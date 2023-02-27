@@ -22,7 +22,7 @@ public class Peers {
     /**
      * peerid
      */
-    private byte[] peerId;
+    private String peerId;
 
     /**
      * IP

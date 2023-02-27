@@ -32,7 +32,6 @@ public class NettyUdpServer implements ApplicationRunner {
                         @Override
                         protected void initChannel(Channel channel) throws Exception {
                             ChannelPipeline pipeline = channel.pipeline();
-//                            pipeline.addLast(new TrackerUdpDecoder());
                             pipeline.addLast(new TrackerUdpHandler());
                         }
                     });

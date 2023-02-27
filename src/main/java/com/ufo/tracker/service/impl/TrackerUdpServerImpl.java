@@ -103,6 +103,8 @@ public class TrackerUdpServerImpl  implements TrackerUdpServer {
         if(tor == null){
             peersMapper.insert(peers);
         }else {
+            peers.setUploaded(tor.getUploaded() + peers.getUploaded());
+            peers.setDownloaded(tor.getDownloaded() + peers.getDownloaded());
             peersMapper.update(peers, Wrappers.<Peers>lambdaQuery().eq(Peers::getTorrent, udpTracker.getTorrent()).eq(Peers::getPasskey, udpTracker.getPrivateKey()));
         }
 
@@ -120,14 +122,17 @@ public class TrackerUdpServerImpl  implements TrackerUdpServer {
             List<Peers> moreSeeders = peersMapper.selectList(
                     Wrappers.<Peers>lambdaQuery().eq(Peers::getTorrent, udpTracker.getTorrent())
                             .eq(Peers::getEvent,2).orderByDesc(Peers::getLastAction).last(" limit " + limit));
-            seeder = moreSeeders.size();
+            leecher = moreSeeders.size();
             seedersAll.addAll(moreSeeders);
+        }
+        if(seeder==0){
+            seeder = leecher;
         }
 
         byte[] action =  TrackerUtils.intToByte(udpTracker.getAction());
         byte[] tranId =  TrackerUtils.intToByte(udpTracker.getTransactionId());
         byte[] interval = TrackerUtils.intToByte(60);
-        byte[] leechers = TrackerUtils.intToByte(0);
+        byte[] leechers = TrackerUtils.intToByte(leecher);
         byte[] seeders = TrackerUtils.intToByte(seeder);
         byte[] all = ArrayUtil.addAll(action, tranId, interval, leechers, seeders);
         for (Peers p : seedersAll){
